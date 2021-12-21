@@ -7,6 +7,29 @@ export DOTFILES=$HOME/.dotfiles
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+export PATH="/usr/local/bin:$PATH"
+
+source /usr/local/share/antigen/antigen.zsh
+
+export LSCOLORS='exfxcxdxbxegedabagacad'
+export CLICOLOR=true
+export VSCODE=code
+export EDITOR="$VSCODE -w"
+export VISUAL=$EDITOR
+export TERM="xterm-256color"
+export PAGER='less'
+export LESS='-giAMR'
+
+# Load local sh, export, for example export GOPATH, export JAVA_HOME, export ANDROID_SDK, etc...
+[[ -s "$HOME/.export" ]] && source "$HOME/.export"
+
+# Load the oh-my-zsh's library
+antigen use oh-my-zsh
+
+alias be="bundle exec"
+alias c="console"
+
+
 # Enable completions
 autoload -Uz compinit && compinit
 
@@ -15,17 +38,91 @@ export MNML_INSERT_CHAR="$"
 export MNML_PROMPT=(mnml_git mnml_keymap)
 export MNML_RPROMPT=('mnml_cwd 20')
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="minimal"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+# bundle antigen zsh plugins @ https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins
+antigen bundles <<EOBUNDLES
+	common-aliases
+	history 
+	git 
+	docker 
+	zsh_reload 
+	zsh-users/zsh-completions
+	zsh-users/zsh-autosuggestions
+  unixorn/autoupdate-antigen.zshplugin
+EOBUNDLES
+
+# Load the theme @ https://github.com/robbyrussell/oh-my-zsh/tree/master/themes/
+# Load the theme
+# simple and fast
+# antigen theme steeef
+antigen theme candy
+# antigen theme bhilburn/powerlevel9k powerlevel9k
+# cool but slow
+# antigen theme https://github.com/denysdovhan/spaceship-zsh-theme spaceship
+
+# syntax highlighting must come below the bundle to set the correct paths/variables with history search
+antigen bundle zdharma/fast-syntax-highlighting
+antigen bundle zsh-users/zsh-history-substring-search
+
+# Tell antigen that you're done
+antigen apply
+
+# bind keys
+zmodload zsh/terminfo
+bindkey "$terminfo[kcuu1]" history-substring-search-up
+bindkey "$terminfo[kcud1]" history-substring-search-down
+
+# Extra zsh variables - history, auto-completion etc...
+HISTFILE=~/.zsh_history         # where to store zsh config
+HISTSIZE=10240000               # big history
+SAVEHIST=10240000               # big history
+LISTMAX=999999
+
+
+# auto-completion with selection / menu / error correction / cache / etc...
+zstyle ':completion:*:*:*:*:*' menu select
+
+zstyle ':completion:*' verbose true
+zstyle ':completion:*' menu yes select=1
+zstyle ':completion:*' substitute 0
+zstyle ':completion:*' max-errors 2 not-numeric
+zstyle ':completion:*' original true
+zstyle ':completion:*' use-cache true
+zstyle ':completion:*' cache-path ~/.zsh/cache              
+zstyle ':completion:*' accept-exact '*(N)'
+zstyle ':completion:*' file-sort links reverse
+zstyle ':completion:*:commands' rehash true
+zstyle ':completion:*:functions' ignored-patterns '_*'
+
+zstyle ':completion:*' completer _expand _complete _approximate
+zstyle ':completion:*' completions 1
+zstyle ':completion:*' glob 1
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' ignore-parents parent pwd ..
+zstyle ':completion:*' insert-unambiguous true
+zstyle ':completion:*' matcher-list '' '+m:{a-z}={A-Z} r:|[._-]=* r:|=*' '' 'l:|=* r:|=*'
+zstyle ':completion:*:messages' format $'\e[00;31m%d'
+zstyle ':completion:*:descriptions' format "- %d -"
+zstyle ':completion:*:corrections' format "- %d - (errors %e})"
+zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+zstyle -e ':completion:*:default' list-colors 'reply=("${PREFIX:+=(#bi)($PREFIX:t)*==36=36}:${(s.:.)LS_COLORS}")';
+
+zstyle ':filter-select:highlight' matched fg=red
+zstyle ':filter-select' max-lines 1000
+zstyle ':filter-select' rotate-list yes
+zstyle ':filter-select' case-insensitive yes # enable case-insensitive search
+
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+. $HOME/.asdf/asdf.sh
+
+. $HOME/.asdf/completions/asdf.bash
+
+eval "$(direnv hook zsh)"
+eval "$(ssh-add -K ~/.ssh/id_rsa)"
+
+
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -63,13 +160,8 @@ ZSH_THEME="minimal"
 # much, much faster.
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-HIST_STAMPS="dd/mm/yyyy"
+
+HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
 ZSH_CUSTOM=$DOTFILES
